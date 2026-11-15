@@ -5,11 +5,12 @@ const {
     getAllTags,
     createTag
 } = require("../controllers/tagController");
+const { authenticateEmployer } = require("../middleware/authMiddleware");
 
 // GET all tags
 router.get("/", getAllTags);
 
 // POST a new tag
-router.post("/", createTag);
+router.post("/", authenticateEmployer, createTag);
 
 module.exports = router;

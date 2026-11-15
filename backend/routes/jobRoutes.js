@@ -12,15 +12,17 @@ const {
 const { addTagsToJob ,
     getTagsByJob
 } = require("../controllers/jobTagController");
+const { authenticateEmployer } = require("../middleware/authMiddleware");
 
+router.post("/", authenticateEmployer, createJob);
+
+router.put("/:id", authenticateEmployer, updateJob);
+
+router.delete("/:id", authenticateEmployer, deleteJob);
+
+router.post("/:id/tags", authenticateEmployer, addTagsToJob);
 router.get("/", getAllJobs);
-router.post("/", createJob);
 router.get("/:id", getJobById);
-router.put("/:id", updateJob);
-router.delete("/:id", deleteJob);
 router.get("/:id/tags", getTagsByJob);
-
-// Assign tags to a job
-router.post("/:id/tags", addTagsToJob);
 
 module.exports = router;

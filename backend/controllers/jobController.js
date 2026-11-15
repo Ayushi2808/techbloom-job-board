@@ -16,14 +16,15 @@ const getAllJobs = async (req, res) => {
         const values = [];
 
         // Search by job title or company
-        if (search && search.trim()) {
-            conditions.push(
-                "(j.title LIKE ? OR j.company_name LIKE ?)"
-            );
+        // Search by job title, company, description or requirements
+if (search && search.trim()) {
+    conditions.push(
+        "(j.title LIKE ? OR j.company_name LIKE ? OR j.description LIKE ? OR j.requirements LIKE ?)"
+    );
 
-            const searchValue = `%${search.trim()}%`;
-            values.push(searchValue, searchValue);
-        }
+    const searchValue = `%${search.trim()}%`;
+    values.push(searchValue, searchValue, searchValue, searchValue);
+}
 
         // Filter by location
         if (location && location.trim()) {

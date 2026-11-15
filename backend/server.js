@@ -10,7 +10,7 @@ const jobRoutes = require("./routes/jobRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const candidateRoutes = require("./routes/candidateRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
-
+const employerRoutes = require("./routes/employerRoutes");
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -18,6 +18,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/candidates", candidateRoutes);
 app.use("/api/applications", applicationRoutes);
+app.use("/api/employer", employerRoutes);
 
 // Test route
 app.get("/", (req, res) => {

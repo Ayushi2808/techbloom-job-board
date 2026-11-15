@@ -1,6 +1,7 @@
 
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // Register a new candidate
 const registerCandidate = async (req, res) => {
@@ -105,6 +106,77 @@ const registerCandidate = async (req, res) => {
     }
 };
 
+// Login candidate
+const loginCandidate = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Check required fields
+        if (!email?.trim() || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and password are required"
+            });
+        }
+
+        // Find candidate by email
+        const [candidates] = await db.query(
+            "SELECT * FROM candidates WHERE email = ?",
+            [email.trim().toLowerCase()]
+        );
+
+        if (candidates.length === 0) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
+        }
+
+        const candidate = candidates[0];
+
+        // Compare entered password with stored password hash
+        const passwordMatch = await bcrypt.compare(
+            password,
+            candidate.password_hash
+        );
+
+        if (!passwordMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            {
+                candidateId: candidate.candidate_id,
+                role: "candidate"
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            token,
+            candidate: {
+                candidate_id: candidate.candidate_id,
+                full_name: candidate.full_name,
+                email: candidate.email
+            }
+        });
+
+    } catch (error) {
+        console.error("Candidate login error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Login failed"
+        });
+    }
+};
 
 // Get candidate by ID
 const getCandidateById = async (req, res) => {
@@ -117,6 +189,13 @@ const getCandidateById = async (req, res) => {
                 message: "Invalid candidate ID"
             });
         }
+        // Check profile ownership
+if (Number(req.user.candidateId) !== candidateId) {
+    return res.status(403).json({
+        success: false,
+        message: "You can only access your own profile"
+    });
+}
 
         const [candidates] = await db.query(
             `SELECT
@@ -271,6 +350,7 @@ const updateCandidate = async (req, res) => {
 
 module.exports = {
     registerCandidate,
+    loginCandidate,
     getCandidateById,
     updateCandidate
 };

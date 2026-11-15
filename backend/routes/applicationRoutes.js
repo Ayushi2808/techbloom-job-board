@@ -8,16 +8,32 @@ const {
     getApplicantsByJob,
     updateApplicationStatus
 } = require("../controllers/applicationController");
+const { authenticateCandidate } = require("../middleware/authMiddleware");
+const { authenticateEmployer } = require("../middleware/authMiddleware");
 
 // Apply for a job
-router.post("/jobs/:jobId/apply", applyForJob);
+router.post(
+    "/jobs/:jobId/apply",
+    authenticateCandidate,
+    applyForJob
+);
 
 // Get applications submitted by a candidate
-router.get("/candidate/:candidateId", getApplicationsByCandidate);
+router.get(
+    "/candidate/:candidateId",
+    authenticateCandidate,
+    getApplicationsByCandidate
+);
 
-// Get all applicants for a job
-router.get("/jobs/:jobId/applicants", getApplicantsByJob);
+router.get(
+    "/jobs/:jobId/applicants",
+    authenticateEmployer,
+    getApplicantsByJob
+);
 
-router.put("/:applicationId/status", updateApplicationStatus);
-
+router.put(
+    "/:applicationId/status",
+    authenticateEmployer,
+    updateApplicationStatus
+);
 module.exports = router;

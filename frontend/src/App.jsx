@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react'
 import './App.css'
 
@@ -41,7 +40,61 @@ const [selectedJobTags, setSelectedJobTags] = useState([])
 const [jobPostLoading, setJobPostLoading] = useState(false)
 const [jobPostError, setJobPostError] = useState('')
 const [jobPostSuccess, setJobPostSuccess] = useState('')
+const [showLogin, setShowLogin] = useState(false)
+const [showSignup, setShowSignup] = useState(false)
+const [loginEmail, setLoginEmail] = useState('')
+const [loginPassword, setLoginPassword] = useState('')
+const [loginLoading, setLoginLoading] = useState(false)
+const [loginError, setLoginError] = useState('')
 
+const [authToken, setAuthToken] = useState('')
+const [loggedInCandidate, setLoggedInCandidate] = useState(null)
+const [candidateProfile, setCandidateProfile] = useState(null)
+const [showProfileDetails, setShowProfileDetails] = useState(false)
+const [signupName, setSignupName] = useState('')
+const [signupEmail, setSignupEmail] = useState('')
+const [signupPassword, setSignupPassword] = useState('')
+
+const [signupLoading, setSignupLoading] = useState(false)
+const [signupError, setSignupError] = useState('')
+const [signupSuccess, setSignupSuccess] = useState('')
+const [employerToken, setEmployerToken] = useState('')
+const [showEmployerLogin, setShowEmployerLogin] = useState(false)
+
+const [employerEmail, setEmployerEmail] = useState('employer@techbloom.com')
+const [employerPassword, setEmployerPassword] = useState('')
+
+const [employerLoginError, setEmployerLoginError] = useState('')
+const [employerLoginLoading, setEmployerLoginLoading] = useState(false)
+useEffect(() => {
+  const fetchCandidateProfile = async () => {
+    if (!authToken || !loggedInCandidate) return
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/candidates/${loggedInCandidate.candidate_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        }
+      )
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to fetch profile')
+      }
+
+      setCandidateProfile(result.data)
+
+    } catch (error) {
+      console.error('Profile error:', error.message)
+    }
+  }
+
+  fetchCandidateProfile()
+}, [authToken, loggedInCandidate])
   // Fetch jobs whenever search or work mode changes
   useEffect(() => {
     const fetchJobs = async () => {
@@ -108,51 +161,30 @@ const [jobPostSuccess, setJobPostSuccess] = useState('')
       behavior: 'smooth'
     })
   }
-
-  const handleApplicationSubmit = async (e) => {
+const handleApplicationSubmit = async (e) => {
   e.preventDefault()
 
   if (!selectedJob) return
+
+  if (!authToken || !loggedInCandidate) {
+    setApplicationError('Please log in before applying for a job.')
+    return
+  }
 
   try {
     setApplicationLoading(true)
     setApplicationError('')
     setApplicationSuccess('')
 
-    // Register candidate
-    const registerResponse = await fetch(
-      'http://localhost:5000/api/candidates/register',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          full_name: applicant.full_name,
-          email: applicant.email,
-          password: applicant.password,
-          resume_url: applicant.resume_url,
-          portfolio_url: applicant.portfolio_url
-        })
-      }
-    )
-
-    const registerResult = await registerResponse.json()
-
-    if (!registerResponse.ok) {
-      throw new Error(registerResult.message || 'Candidate registration failed')
-    }
-
-    // Submit application using the returned candidate ID
     const applicationResponse = await fetch(
       `http://localhost:5000/api/applications/jobs/${selectedJob.job_id}/apply`,
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
         },
         body: JSON.stringify({
-          candidate_id: registerResult.candidate_id,
           cover_letter: applicant.cover_letter
         })
       }
@@ -160,11 +192,15 @@ const [jobPostSuccess, setJobPostSuccess] = useState('')
 
     const applicationResult = await applicationResponse.json()
 
-    if (!applicationResponse.ok) {
-      throw new Error(applicationResult.message || 'Application failed')
+    if (!applicationResponse.ok || !applicationResult.success) {
+      throw new Error(
+        applicationResult.message || 'Application failed'
+      )
     }
 
-    setApplicationSuccess('Your application was submitted successfully!')
+    setApplicationSuccess(
+      'Your application was submitted successfully!'
+    )
 
   } catch (err) {
     setApplicationError(err.message)
@@ -172,7 +208,7 @@ const [jobPostSuccess, setJobPostSuccess] = useState('')
     setApplicationLoading(false)
   }
 }
-
+  
 const handleJobInputChange = (e) => {
   const { name, value } = e.target
 
@@ -204,7 +240,8 @@ const handleJobSubmit = async (e) => {
     const jobResponse = await fetch('http://localhost:5000/api/jobs', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${employerToken}`
       },
       body: JSON.stringify({
         ...newJob,
@@ -232,7 +269,8 @@ const handleJobSubmit = async (e) => {
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${employerToken}`
           },
           body: JSON.stringify({
             tag_ids: selectedJobTags
@@ -269,7 +307,127 @@ const handleJobSubmit = async (e) => {
     setJobPostLoading(false)
   }
 }
+const handleLogin = async (e) => {
+  e.preventDefault()
 
+  try {
+    setLoginLoading(true)
+    setLoginError('')
+
+    const response = await fetch(
+      'http://localhost:5000/api/candidates/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword
+        })
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Login failed')
+    }
+
+    setAuthToken(result.token)
+    setLoggedInCandidate(result.candidate)
+
+    setShowLogin(false)
+    setLoginEmail('')
+    setLoginPassword('')
+
+  } catch (error) {
+    setLoginError(error.message)
+  } finally {
+    setLoginLoading(false)
+  }
+}
+
+const handleSignup = async (e) => {
+  e.preventDefault()
+
+  try {
+    setSignupLoading(true)
+    setSignupError('')
+    setSignupSuccess('')
+
+    const response = await fetch(
+      'http://localhost:5000/api/candidates/register',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          full_name: signupName,
+          email: signupEmail,
+          password: signupPassword
+        })
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Registration failed')
+    }
+
+    setSignupSuccess('Account created successfully! You can now log in.')
+
+    setSignupName('')
+    setSignupEmail('')
+    setSignupPassword('')
+
+  } catch (error) {
+    setSignupError(error.message)
+  } finally {
+    setSignupLoading(false)
+  }
+}
+
+const handleEmployerLogin = async (e) => {
+  e.preventDefault()
+
+  try {
+    setEmployerLoginLoading(true)
+    setEmployerLoginError('')
+
+    const response = await fetch(
+      'http://localhost:5000/api/employer/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: employerEmail,
+          password: employerPassword
+        })
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Employer login failed')
+    }
+
+    setEmployerToken(result.token)
+    setEmployerPassword('')
+    setShowEmployerLogin(false)
+    setShowJobForm(true)
+
+  } catch (error) {
+    setEmployerLoginError(error.message)
+  } finally {
+    setEmployerLoginLoading(false)
+  }
+}
   return (
     <div className="app">
 
@@ -286,10 +444,210 @@ const handleJobSubmit = async (e) => {
         </div>
 
         <div className="nav-actions">
-          <button className="login-btn">Log In</button>
-          <button className="signup-btn">Sign Up</button>
-        </div>
+  {loggedInCandidate ? (
+    <>
+      <button
+  className="profile-toggle-btn"
+  onClick={() => setShowProfileDetails(prev => !prev)}
+>
+  {loggedInCandidate.full_name}
+  <span>⌄</span>
+</button>
+
+      <button
+        className="login-btn"
+        onClick={() => {
+          setAuthToken('')
+          setLoggedInCandidate(null)
+          setCandidateProfile(null)
+        }}
+      >
+        Log Out
+      </button>
+    </>
+  ) : (
+    <>
+      <button
+        className="login-btn"
+        onClick={() => setShowLogin(true)}
+      >
+        Log In
+      </button>
+
+      <button
+  className="signup-btn"
+  onClick={() => setShowSignup(true)}
+>
+  Sign Up
+</button>
+    </>
+  )}
+</div>
       </nav>
+
+      {/* Candidate Profile */}
+{showProfileDetails && candidateProfile && (
+  <section className="candidate-profile-card">
+    <p>My Profile</p>
+
+    <h2>{candidateProfile.full_name}</h2>
+
+    <p>Email: {candidateProfile.email}</p>
+
+    {candidateProfile.phone && (
+      <p>Phone: {candidateProfile.phone}</p>
+    )}
+
+    {candidateProfile.location && (
+      <p>Location: {candidateProfile.location}</p>
+    )}
+
+    {candidateProfile.headline && (
+      <p>{candidateProfile.headline}</p>
+    )}
+  </section>
+)}
+
+      {/* Login Modal */}
+{showLogin && (
+  <div className="login-modal-overlay">
+    <div className="login-modal">
+
+      <button
+        type="button"
+        className="login-close-btn"
+        onClick={() => {
+          setShowLogin(false)
+          setLoginError('')
+        }}
+      >
+        ×
+      </button>
+
+      <h2>Welcome Back!</h2>
+      <p>Log in to your TechBloom account.</p>
+
+      <form onSubmit={handleLogin}>
+
+        <label>Email Address</label>
+        <input
+          type="email"
+          placeholder="Enter your email"
+          value={loginEmail}
+          onChange={(e) => setLoginEmail(e.target.value)}
+          required
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="Enter your password"
+          value={loginPassword}
+          onChange={(e) => setLoginPassword(e.target.value)}
+          required
+        />
+
+        {loginError && (
+          <p className="login-error">{loginError}</p>
+        )}
+
+        <button
+          type="submit"
+          className="login-submit-btn"
+          disabled={loginLoading}
+        >
+          {loginLoading ? 'Logging in...' : 'Log In'}
+        </button>
+
+      </form>
+    </div>
+  </div>
+)}
+
+{/* Signup Modal */}
+{showSignup && (
+  <div className="login-modal-overlay">
+    <div className="login-modal">
+
+      <button
+        type="button"
+        className="login-close-btn"
+        onClick={() => {
+          setShowSignup(false)
+          setSignupError('')
+          setSignupSuccess('')
+        }}
+      >
+        ×
+      </button>
+
+      <h2>Create Your Account</h2>
+      <p>Join TechBloom and explore new opportunities.</p>
+
+      <form onSubmit={handleSignup}>
+
+        <label>Full Name</label>
+        <input
+          type="text"
+          placeholder="Enter your full name"
+          value={signupName}
+          onChange={(e) => setSignupName(e.target.value)}
+          required
+        />
+
+        <label>Email Address</label>
+        <input
+          type="email"
+          placeholder="Enter your email"
+          value={signupEmail}
+          onChange={(e) => setSignupEmail(e.target.value)}
+          required
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="Create a password"
+          value={signupPassword}
+          onChange={(e) => setSignupPassword(e.target.value)}
+          minLength={8}
+          required
+        />
+
+        {signupError && (
+          <p className="login-error">{signupError}</p>
+        )}
+
+        {signupSuccess && (
+          <p className="signup-success">{signupSuccess}</p>
+        )}
+
+        <button
+          type="submit"
+          className="login-submit-btn"
+          disabled={signupLoading}
+        >
+          {signupLoading ? 'Creating Account...' : 'Sign Up'}
+        </button>
+
+      </form>
+
+      <p className="signup-login-text">
+        Already have an account?{' '}
+        <button
+          type="button"
+          onClick={() => {
+            setShowSignup(false)
+            setShowLogin(true)
+          }}
+        >
+          Log In
+        </button>
+      </p>
+
+    </div>
+  </div>
+)}
 
       {/* Hero Section */}
       <section className="hero-section" id="home">
@@ -460,6 +818,64 @@ const handleJobSubmit = async (e) => {
           <p>Find talented candidates for your team.</p>
         </div>
 
+        {/* Employer Login Modal */}
+{showEmployerLogin && (
+  <div className="login-modal-overlay">
+    <div className="login-modal">
+
+      <button
+        type="button"
+        className="login-close-btn"
+        onClick={() => {
+          setShowEmployerLogin(false)
+          setEmployerLoginError('')
+          setEmployerPassword('')
+        }}
+      >
+        ×
+      </button>
+
+      <h2>Employer Login</h2>
+      <p>Log in to manage your job listings.</p>
+
+      <form onSubmit={handleEmployerLogin}>
+
+        <label>Email Address</label>
+        <input
+          type="email"
+          value={employerEmail}
+          onChange={(e) => setEmployerEmail(e.target.value)}
+          required
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="Enter employer password"
+          value={employerPassword}
+          onChange={(e) => setEmployerPassword(e.target.value)}
+          required
+        />
+
+        {employerLoginError && (
+          <p className="login-error">
+            {employerLoginError}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="login-submit-btn"
+          disabled={employerLoginLoading}
+        >
+          {employerLoginLoading ? 'Logging in...' : 'Log In'}
+        </button>
+
+      </form>
+    </div>
+  </div>
+)}
+
         {!showJobForm && (
           <button
             className="signup-btn"
@@ -608,68 +1024,67 @@ const handleJobSubmit = async (e) => {
         ×
       </button>
 
-      <form onSubmit={handleApplicationSubmit} className="application-form">
+<form onSubmit={handleApplicationSubmit} className="application-form">
 
   <h3>Apply for this Position</h3>
 
-  <input
-    type="text"
-    placeholder="Full Name"
-    required
-    value={applicant.full_name}
-    onChange={(e) =>
-      setApplicant({ ...applicant, full_name: e.target.value })
-    }
-  />
+  {candidateProfile && (
+  <div className="applicant-profile-summary">
 
-  <input
-    type="email"
-    placeholder="Email Address"
-    required
-    value={applicant.email}
-    onChange={(e) =>
-      setApplicant({ ...applicant, email: e.target.value })
-    }
-  />
+    <h4>Your Application Details</h4>
 
-  <input
-    type="password"
-    placeholder="Create Password (minimum 8 characters)"
-    required
-    minLength={8}
-    value={applicant.password}
-    onChange={(e) =>
-      setApplicant({ ...applicant, password: e.target.value })
-    }
-  />
+    <p>
+      <strong>Name:</strong> {candidateProfile.full_name}
+    </p>
 
-  <input
-    type="url"
-    placeholder="Resume URL"
-    value={applicant.resume_url}
-    onChange={(e) =>
-      setApplicant({ ...applicant, resume_url: e.target.value })
-    }
-  />
+    <p>
+      <strong>Email:</strong> {candidateProfile.email}
+    </p>
 
-  <input
-    type="url"
-    placeholder="Portfolio URL"
-    value={applicant.portfolio_url}
-    onChange={(e) =>
-      setApplicant({ ...applicant, portfolio_url: e.target.value })
-    }
-  />
+    <p>
+      <strong>Resume:</strong>{' '}
+      {candidateProfile.resume_url ? (
+        <a
+          href={candidateProfile.resume_url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Resume
+        </a>
+      ) : (
+        'Not added to profile'
+      )}
+    </p>
+
+    <p>
+      <strong>Portfolio:</strong>{' '}
+      {candidateProfile.portfolio_url ? (
+        <a
+          href={candidateProfile.portfolio_url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Portfolio
+        </a>
+      ) : (
+        'Not added to profile'
+      )}
+    </p>
+
+  </div>
+)}
 
   <textarea
-    placeholder="Cover Letter (optional)"
+    placeholder="Write your cover letter (optional)"
     value={applicant.cover_letter}
     onChange={(e) =>
       setApplicant({ ...applicant, cover_letter: e.target.value })
     }
   />
 
-  {applicationError && <p className="form-error">{applicationError}</p>}
+  {applicationError && (
+    <p className="form-error">{applicationError}</p>
+  )}
 
   {applicationSuccess && (
     <p className="form-success">{applicationSuccess}</p>

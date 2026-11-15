@@ -4,7 +4,7 @@ const db = require("../config/db");
 // Apply for a job
 const applyForJob = async (req, res) => {
     try {
-        const candidateId = Number(req.body.candidate_id);
+        const candidateId = Number(req.user.candidateId);
         const jobId = Number(req.params.jobId);
         const { cover_letter } = req.body;
 
@@ -85,8 +85,16 @@ const applyForJob = async (req, res) => {
 
 const getApplicationsByCandidate = async (req, res) => {
     try {
-        const candidateId = Number(req.params.candidateId);
+        const candidateId = Number(req.user.candidateId);
+        const requestedCandidateId = Number(req.params.candidateId);
 
+        // Check application history ownership
+if (requestedCandidateId !== candidateId) {
+    return res.status(403).json({
+        success: false,
+        message: "You can only view your own applications"
+    });
+}
         if (!Number.isInteger(candidateId) || candidateId <= 0) {
             return res.status(400).json({
                 success: false,

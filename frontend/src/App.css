@@ -586,3 +586,180 @@ ation-form {
 .form-success {
   color: #27834a;
 }
+
+/* Login Modal */
+.login-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(35, 25, 40, 0.45);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.login-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(145deg, #fffafd, #f8f0ff);
+  padding: 35px;
+  border-radius: 22px;
+  box-shadow: 0 15px 45px rgba(60, 35, 75, 0.18);
+}
+
+.login-modal h2 {
+  color: #50365f;
+  margin-bottom: 8px;
+  font-size: 27px;
+}
+
+.login-modal > p {
+  color: #82748b;
+  margin-bottom: 25px;
+}
+
+.login-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  color: #796782;
+  font-size: 27px;
+  cursor: pointer;
+}
+
+.login-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-modal label {
+  color: #574664;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.login-modal input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #e6d9ec;
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.login-modal input:focus {
+  border-color: #ba8bd4;
+  box-shadow: 0 0 0 3px rgba(186, 139, 212, 0.12);
+}
+
+.login-submit-btn {
+  margin-top: 12px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(110deg, #c69bdf, #e6a9c8);
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-error {
+  color: #d04458;
+  font-size: 13px;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .login-modal {
+    padding: 28px 22px;
+  }
+}
+/* Candidate Profile */
+.candidate-profile-card {
+  max-width: 650px;
+  margin: 25px auto;
+  padding: 25px;
+  background: linear-gradient(135deg, #fff7fb, #f5edff);
+  border: 1px solid #eadcf2;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(80, 54, 95, 0.08);
+}
+
+.candidate-profile-card h2 {
+  color: #50365f;
+  margin: 10px 0;
+}
+
+.candidate-profile-card p {
+  color: #75677f;
+  margin: 8px 0;
+}
+
+.signup-success {
+  color: #25845b;
+  font-size: 13px;
+  margin: 5px 0;
+}
+
+.signup-login-text {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 18px;
+}
+
+.signup-login-text button {
+  border: none;
+  background: none;
+  color: #9865bd;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.applying-as {
+  color: #75677f;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.applicant-profile-summary {
+  background: linear-gradient(135deg, #fff7fb, #f5edff);
+  border: 1px solid #eadcf2;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.applicant-profile-summary h4 {
+  color: #50365f;
+  margin-bottom: 14px;
+}
+
+.applicant-profile-summary p {
+  color: #75677f;
+  font-size: 14px;
+  margin: 9px 0;
+}
+
+.applicant-profile-summary a {
+  color: #9865bd;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.applicant-profile-summary a:hover {
+  text-decoration: underline;
+}
