@@ -1,221 +1,183 @@
-TechBloom – Tech Job Board & Candidate Portal
-TechBloom is a full-stack job board application that connects employers with candidates. Employers can publish job openings and assign technology tags. Candidates can browse and filter listings, create an account, and submit applications. The application uses a React frontend, an Express REST API, and a MySQL relational database.
-Project status: Core candidate and employer authentication, job management, application submission, applicant access controls, and database relationships have been implemented and tested locally. Add the final walkthrough screenshots and deployment URL after those deliverables are ready.
 
-Features
-Candidates
-- Register with an email address and password.
-- Log in and receive a JWT authentication token.
-- Browse job listings and view job details.
-- Search and filter listings by supported job fields, work mode, and technology tags.
-- View and update their own candidate profile.
-- Submit an application using their authenticated account.
-- View their own application history.
-Employers
-- Log in using the employer credentials configured in the backend environment.
-- Create, update, and delete job listings.
-- Assign technology tags to job listings.
-- View applicants for a job.
-- Update application statuses.
-Platform
-- Store job listings, candidates, technology tags, and applications in MySQL.
-- Model job/tag and candidate/application relationships with foreign keys.
-- Prevent duplicate applications for the same candidate and job.
-- Protect candidate and employer endpoints with role-specific JWT authentication.
-Technology Stack
-Layer	Technologies
-Frontend	React, Vite, CSS, JavaScript
-Backend	Node.js, Express.js
-Database	MySQL
-Database driver	mysql2
-Authentication	JSON Web Tokens (jsonwebtoken), bcrypt password hashing
-Configuration and middleware	dotenv, CORS, Express JSON middleware
+# TechBloom – Tech Job Board & Candidate Portal
 
+TechBloom is a full-stack job board platform that connects employers with candidates. Employers can post job openings, while candidates can browse jobs, filter by location and technology tags, and submit applications.
 
-Project Structure
+## Screenshots
+
+| Homepage | Job Listings |
+|---|---|
+| ![Homepage](screenshots/01-homepage.png) | ![Job Listings](screenshots/02-job-listings.png) |
+
+| Job Details | Candidate Login |
+|---|---|
+| ![Job Details](screenshots/03-job-details.png) | ![Candidate Login](screenshots/04-candidate-login.png) |
+
+| Employer Dashboard | Candidate Signup |
+|---|---|
+| ![Employer Dashboard](screenshots/05-employer-dashboard.png) | ![Candidate Signup](screenshots/06-candidate-signup.png) |
+
+## Features
+
+- **Job Posting:** Employers can create, update, and delete job listings.
+- **Job Search & Filters:** Search jobs by supported fields, work mode (Remote/Hybrid), and technology tags.
+- **Candidate Authentication:** Candidate registration and login.
+- **Job Applications:** Candidates can apply for jobs and view their application history.
+- **Employer Dashboard:** Employers can manage job listings, view applicants, and update application statuses.
+- **Database Persistence:** MySQL stores jobs, candidates, tags, and applications.
+- **Secure Access:** JWT authentication and role-based authorization.
+
+## Tech Stack
+
+- **Frontend:** React, Vite, CSS, JavaScript
+- **Backend:** Node.js, Express.js
+- **Database:** MySQL
+- **Authentication:** JWT, bcrypt
+
+## Project Structure
+
+```text
 tech-job-board/
 ├── backend/
 │   ├── config/
-│   │   └── db.js
 │   ├── controllers/
 │   ├── middleware/
-│   │   └── authMiddleware.js
 │   ├── routes/
-│   ├── .env                  # local secrets; do not commit
-│   ├── server.js
-│   └── package.json
+│   └── server.js
 ├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   └── App.css
-│   └── package.json
-├── .gitignore
+│   └── src/
+├── database/
+│   └── techbloom_schema.sql
+├── screenshots/
 └── README.md
-Prerequisites
-Install the following before running the project:
-- Node.js and npm.
-- MySQL Server and a MySQL client such as MySQL Workbench.
-- Git (to clone the repository).
-Installation and Local Setup
-1. Clone the repository
+```
+
+## Installation & Setup
+
+**Prerequisites:** Node.js, npm, and MySQL.
+
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/Ayushi2808/techbloom-job-board.git
 cd techbloom-job-board
-2. Create the database
-Create the database in MySQL:
+```
+
+### 2. Set up the database
+
+Create the database:
+
+```sql
 CREATE DATABASE techbloom;
-Create/import the project tables in the techbloom database before starting the backend. The application uses these five tables:
-- jobs
-- tags
-- job_tags
-- candidates
-- applications
-The local development database used for this project was created in MySQL Workbench. For a reproducible setup on another machine, include and import a schema export (for example, backend/database/techbloom_schema.sql) containing the table definitions, indexes, and foreign keys. Do not assume that creating the database alone creates its tables.
-3. Configure the backend
-Open a terminal in the project root and run:
+```
+
+Import `database/techbloom_schema.sql` into the `techbloom` database.
+
+### 3. Start the backend
+
+```bash
 cd backend
 npm install
-Create a file named .env inside backend/ with your own local values:
-PORT=5000
+```
 
+Create a `.env` file inside the backend folder:
+
+```env
+PORT=5000
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_NAME=techbloom
 DB_PORT=3306
+JWT_SECRET=your_secret_key
+EMPLOYER_EMAIL=your_employer_email
+EMPLOYER_PASSWORD_HASH=your_bcrypt_password_hash
+```
 
-JWT_SECRET=replace_with_a_long_random_secret
+Start the backend:
 
-EMPLOYER_EMAIL=employer@techbloom.com
-EMPLOYER_PASSWORD_HASH=replace_with_a_bcrypt_hash
-Generate a random JWT secret from the backend terminal:
-node -p "require('crypto').randomBytes(32).toString('hex')"
-Generate the employer password hash with bcrypt. For example, open the Node.js REPL from the backend folder:
-node
-Then run:
-const bcrypt = require('bcrypt')
-await bcrypt.hash('choose-a-strong-employer-password', 10)
-Copy the generated hash into EMPLOYER_PASSWORD_HASH in .env, then exit the REPL with .exit. Choose your own password; do not use the example password above.
-
-Security: Never commit .env, plaintext passwords, JWT secrets, or password hashes to GitHub. Keep .env in .gitignore.
-4. Start the backend
-From the backend/ directory:
+```bash
 npm run dev
-The backend runs at:
-http://localhost:5000
-The root route (GET /) returns a simple backend-running message.
-5. Start the frontend
-Open a second terminal at the project root:
+```
+
+Backend URL: `http://localhost:5000`
+
+### 4. Start the frontend
+
+Open another terminal:
+
+```bash
 cd frontend
 npm install
 npm run dev
-The Vite development server is available at:
-http://localhost:5173
-Keep both terminal processes running while using the local application.
-Database Model
-TechBloom uses five relational tables.
-Table	Purpose
-jobs	Stores job listings, including title, company, location, work mode, employment type, salary range, description, and requirements.
-tags	Stores technology skills/tags such as React, JavaScript, Node.js, and MySQL.
-job_tags	Junction table that associates jobs with technology tags.
-candidates	Stores candidate account and profile information. Passwords are stored as bcrypt hashes.
-applications	Stores applications submitted by candidates for jobs, including cover letter, status, and applied date.
+```
 
+Frontend URL: `http://localhost:5173`
 
-Relationships and foreign keys
-Child table and column	References	Relationship
-applications.candidate_id	candidates.candidate_id	One candidate can submit multiple applications.
-applications.job_id	jobs.job_id	One job can receive multiple applications.
-job_tags.job_id	jobs.job_id	A job can have multiple technology tags.
-job_tags.tag_id	tags.tag_id	A technology tag can be associated with multiple jobs.
+**Note:** Never commit your `.env` file, database credentials, or authentication secrets to GitHub.
 
+## Database Model
 
-The job_tags junction table implements the many-to-many relationship between jobs and tags. The application-to-candidate and application-to-job foreign keys associate each application with its candidate and job.
-API Reference
-All endpoints are relative to http://localhost:5000. Protected routes require a JWT in the request header:
+TechBloom uses five relational tables:
+
+| Table | Description |
+|---|---|
+| `jobs` | Stores job listings |
+| `candidates` | Stores candidate account and profile details |
+| `tags` | Stores technology tags |
+| `job_tags` | Connects jobs with technology tags |
+| `applications` | Stores candidate job applications |
+
+### Relationships
+
+- `applications.candidate_id` → `candidates.candidate_id`
+- `applications.job_id` → `jobs.job_id`
+- `job_tags.job_id` → `jobs.job_id`
+- `job_tags.tag_id` → `tags.tag_id`
+
+These foreign keys maintain relationships between jobs, candidates, tags, and applications.
+
+## API Overview
+
+Base URL: `http://localhost:5000`
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/candidates/register` | Candidate registration |
+| POST | `/api/candidates/login` | Candidate login |
+| POST | `/api/employer/login` | Employer login |
+| GET | `/api/jobs` | Get and filter jobs |
+| GET | `/api/jobs/:id` | Get job details |
+| POST | `/api/jobs` | Create a job |
+| PUT | `/api/jobs/:id` | Update a job |
+| DELETE | `/api/jobs/:id` | Delete a job |
+| GET | `/api/tags` | Get technology tags |
+| POST | `/api/tags` | Create a technology tag |
+| GET | `/api/candidates/:id` | Get candidate profile |
+| PUT | `/api/candidates/:id` | Update candidate profile |
+| POST | `/api/applications/jobs/:jobId/apply` | Apply for a job |
+| GET | `/api/applications/candidate/:candidateId` | View candidate applications |
+| GET | `/api/applications/jobs/:jobId/applicants` | View job applicants |
+| PUT | `/api/applications/:applicationId/status` | Update application status |
+
+Protected routes require a JWT:
+
+```http
 Authorization: Bearer <JWT_TOKEN>
-Authentication
-Method	Endpoint	Access	Purpose
-POST	/api/candidates/register	Public	Register a candidate.
-POST	/api/candidates/login	Public	Authenticate a candidate and return a candidate JWT.
-POST	/api/employer/login	Public	Authenticate the configured employer and return an employer JWT.
+```
 
+## Deliverables
 
-Candidate registration accepts full_name, email, and password as required fields. Optional profile fields include phone, location, headline, bio, resume_url, and portfolio_url.
+- Full-stack job board application.
+- React frontend and Express REST API.
+- MySQL relational database with foreign keys.
+- Searchable job directory and technology filters.
+- Candidate application and employer management features.
+- API documentation and database schema.
+- Local walkthrough screenshots.
 
-Login requests accept email and password.
-Jobs
-Method	Endpoint	Access	Purpose
-GET	/api/jobs	Public	List jobs; the jobs controller handles supported search and filter inputs.
-GET	/api/jobs/:id	Public	Get job details.
-POST	/api/jobs	Employer	Create a job listing.
-PUT	/api/jobs/:id	Employer	Update a job listing.
-DELETE	/api/jobs/:id	Employer	Delete a job listing.
-GET	/api/jobs/:id/tags	Public	Get tags assigned to a job.
-POST	/api/jobs/:id/tags	Employer	Assign technology tags to a job.
+**Deployment:** Not deployed yet. The project can be run locally using the instructions above.
 
+## GitHub Repository
 
-The job creation form sends fields including title, company_name, location, employment_type, work_mode, salary_min, salary_max, description, and requirements.
-
-The tag assignment endpoint accepts a tag_ids array.
-Technology Tags
-Method	Endpoint	Access	Purpose
-GET	/api/tags	Public	List technology tags for browsing and filtering.
-POST	/api/tags	Employer	Create a technology tag.
-
-
-Candidates and Profiles
-Method	Endpoint	Access	Purpose
-GET	/api/candidates/:id	Candidate (own profile)	Get the authenticated candidate's profile.
-PUT	/api/candidates/:id	Candidate (own profile)	Update the authenticated candidate's profile.
-
-
-The candidate ID in the URL must match the candidate ID in the verified JWT.
-Applications
-Method	Endpoint	Access	Purpose
-POST	/api/applications/jobs/:jobId/apply	Candidate	Submit an application for a job. The candidate ID is taken from the verified JWT, not from the request body.
-GET	/api/applications/candidate/:candidateId	Candidate (own applications)	Get the authenticated candidate's application history.
-GET	/api/applications/jobs/:jobId/applicants	Employer	Get applicants for a job.
-PUT	/api/applications/:applicationId/status	Employer	Update an application's status.
-
-
-The application submission request accepts a cover_letter field. Candidate identity is derived from the candidate JWT. The application-history endpoint checks that the requested candidate ID matches the authenticated candidate.
-Authentication and Authorization
-- Candidate passwords are hashed with bcrypt before being stored.
-- Candidate and employer login endpoints issue JWTs signed with JWT_SECRET.
-- Candidate-protected endpoints require a candidate token and restrict profile/application-history access to that candidate.
-- Employer-protected endpoints require an employer token for job management, tag creation/assignment, applicant viewing, and application-status updates.
-- The current employer account is configured through EMPLOYER_EMAIL and EMPLOYER_PASSWORD_HASH in the backend environment.
-Local Testing Checklist
-Use Postman or the frontend to verify the following flows:
-- [ ] Register a candidate and log in.
-- [ ] Verify that the candidate receives a JWT.
-- [ ] Browse jobs and filter listings.
-- [ ] Apply for a job while authenticated.
-- [ ] Confirm that duplicate applications are rejected.
-- [ ] Confirm that a candidate can view only their own profile and application history.
-- [ ] Log in as the configured employer.
-- [ ] Create a job and assign technology tags.
-- [ ] Confirm that a candidate token cannot access employer-only routes.
-- [ ] View applicants and update application status using an employer token.
-- [ ] Restart the backend and confirm that job/application records remain in MySQL.
-- [ ] Test the frontend at desktop and mobile viewport widths.
-Screenshots and Walkthrough
-Add screenshots to a screenshots/ directory and link them here before submission. Suggested screenshots:
-1. TechBloom home page and job directory.
-2. Search and filter results.
-3. Candidate registration and login.
-4. Candidate profile and application modal.
-5. Employer login and job posting form.
-6. Employer applicant list and application status.
-For a local walkthrough, include the backend and frontend start commands from the setup section above. Add the live deployment URL here after deployment:
-Live demo: To be added after deployment.
-Repository
-GitHub – TechBloom Job Board
-Notes Before Public Deployment
-- Configure CORS to allow only the deployed frontend origin.
-- Remove or restrict the development database test endpoint.
-- Configure production database credentials and JWT secrets through the hosting provider's environment settings.
-- Replace local API URLs in the frontend with a configurable production API base URL.
-- Use HTTPS for the deployed frontend and API.
-- Never expose employer credentials, password hashes, or JWT secrets in frontend code or public repositories.
+[TechBloom – View Source Code](https://github.com/Ayushi2808/techbloom-job-board)
