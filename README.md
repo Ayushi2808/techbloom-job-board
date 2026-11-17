@@ -3,6 +3,13 @@
 
 TechBloom is a full-stack job board platform that connects employers with candidates. Employers can post job openings, while candidates can browse jobs, filter by location and technology tags, and submit applications.
 
+
+## Live Demo
+
+🚀 **Live Website:** [TechBloom – Tech Job Board](https://techbloom-job-portal.vercel.app)
+
+**Backend API:** https://techbloom-backend.onrender.com
+
 ## Screenshots
 
 | Homepage | Job Listings |
