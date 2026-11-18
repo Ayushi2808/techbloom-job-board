@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://techbloom-backend.onrender.com'
 function App() {
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -72,7 +73,7 @@ useEffect(() => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/candidates/${loggedInCandidate.candidate_id}`,
+        `${API_BASE_URL}/api/candidates/${loggedInCandidate.candidate_id}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`
@@ -117,7 +118,7 @@ useEffect(() => {
 }
 
         const response = await fetch(
-          `http://localhost:5000/api/jobs?${params.toString()}`
+          `${API_BASE_URL}/api/jobs?${params.toString()}`
         )
 
         if (!response.ok) {
@@ -139,7 +140,7 @@ useEffect(() => {
   useEffect(() => {
   const fetchTags = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/tags')
+      const response = await fetch(`${API_BASE_URL}/api/tags`)
 
       if (!response.ok) {
         throw new Error('Failed to fetch tags')
@@ -177,18 +178,18 @@ const handleApplicationSubmit = async (e) => {
     setApplicationSuccess('')
 
     const applicationResponse = await fetch(
-      `http://localhost:5000/api/applications/jobs/${selectedJob.job_id}/apply`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify({
-          cover_letter: applicant.cover_letter
-        })
-      }
-    )
+  `${API_BASE_URL}/api/applications/jobs/${selectedJob.job_id}/apply`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authToken}`
+    },
+    body: JSON.stringify({
+      cover_letter: applicant.cover_letter
+    })
+  }
+)
 
     const applicationResult = await applicationResponse.json()
 
@@ -237,7 +238,7 @@ const handleJobSubmit = async (e) => {
     setJobPostError('')
     setJobPostSuccess('')
 
-    const jobResponse = await fetch('http://localhost:5000/api/jobs', {
+    const jobResponse = await fetch(`${API_BASE_URL}/api/jobs`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -265,7 +266,7 @@ const handleJobSubmit = async (e) => {
 
     if (selectedJobTags.length > 0) {
       const tagResponse = await fetch(
-        `http://localhost:5000/api/jobs/${createdJobId}/tags`,
+        `${API_BASE_URL}/api/jobs/${createdJobId}/tags`,
         {
           method: 'POST',
           headers: {
@@ -315,7 +316,7 @@ const handleLogin = async (e) => {
     setLoginError('')
 
     const response = await fetch(
-      'http://localhost:5000/api/candidates/login',
+      `${API_BASE_URL}/api/candidates/login`,
       {
         method: 'POST',
         headers: {
@@ -357,7 +358,7 @@ const handleSignup = async (e) => {
     setSignupSuccess('')
 
     const response = await fetch(
-      'http://localhost:5000/api/candidates/register',
+      `${API_BASE_URL}/api/candidates/register`,
       {
         method: 'POST',
         headers: {
@@ -398,7 +399,7 @@ const handleEmployerLogin = async (e) => {
     setEmployerLoginError('')
 
     const response = await fetch(
-      'http://localhost:5000/api/employer/login',
+      `${API_BASE_URL}/api/employer/login`,
       {
         method: 'POST',
         headers: {
